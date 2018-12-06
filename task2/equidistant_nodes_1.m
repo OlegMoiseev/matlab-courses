@@ -1,5 +1,4 @@
 numEqDistNodes = 1;
-numChebNodes = 10;
 a = -5*pi;
 b = 5*pi;
 xx = linspace(a, b, 1000);
