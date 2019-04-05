@@ -1,0 +1,19 @@
+clc;
+clear;
+
+t_start = 0;
+t_stop = 20;
+
+m = 1;
+b = 1;
+g = 9.8;
+
+w0 = (m*g/4*b)^(1/2)
+T0 = 4*b*w0^2
+z_targ = 1
+
+T_func = @(k_p, k_d, z, z_der, z_targ) k_p*(z - z_targ) + k_d*z_der + T0;
+
+f = @(z, T) [z(2), g - T/m];
+
+[t, Z] = Euler_quadr(f, [t_start; t_stop], y0);
