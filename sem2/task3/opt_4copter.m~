@@ -3,6 +3,7 @@ clear;
 
 t_start = 0;
 t_stop = 20;
+step = 1e-3;
 
 m = 1;
 b = 1;
@@ -10,10 +11,30 @@ g = 9.8;
 
 w0 = (m*g/4*b)^(1/2)
 T0 = 4*b*w0^2
-z_targ = 1
+T_max = 4*m*g
 
-T_func = @(k_p, k_d, z, z_der, z_targ) k_p*(z - z_targ) + k_d*z_der + T0;
+z_targ = -100
+k_p = 1
+k_d = 1
 
-f = @(z, T) [z(2), g - T/m];
+T_func = @(z, z_der, kpkd) max(min(kpkd(1)*(z - z_targ) + kpkd(2)*z_der + T0, T_max), 0);
 
-[t, Z] = Euler_quadr(f, [t_start; t_stop], y0);
+f = @(x, z, kpkd) [z(2), g - T_func(z(1), z(2), kpkd)/m]';
+
+z0 = [0, 0];
+[t, Z] = ode45(f, [t_start:step:t_stop], z0, [k_p, k_d]);
+
+
+func = @(kpkd) integral(Z(:,1), z_targ, Z(:,2), kpkd, T0, T_max);
+
+k_new = fminsearch(func, [10, 10])
+
+
+z0 = [0, 0];
+[t, Z] = ode45(f, [t_start:step:t_stop], z0, k_new);
+
+plot(t, Z(:,1), 'r'), grid on, hold on  % coordinate Z
+plot(t, Z(:,2), 'blue')  % speed Z
+
+T = T_func(Z(:,1), Z(:,2));
+plot(t, T, 'black')
